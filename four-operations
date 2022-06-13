@@ -1,0 +1,370 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <ctype.h>
+#include <string.h>
+#include<windows.h>
+#define N 20
+
+
+int num1, num2, num3, count, result,resultTrue,flag,grade,t;//result:用户输入结果 resultTrue:正确结果 flag:0 先计算左边 1先计算右边
+char op1, op2;
+char ans[100];
+int nums1[N], nums2[N], nums3[N], results[N], resultTrues[N];
+char ops1[N], ops2[N];
+
+void calculate();
+char menu();
+void evaluate();
+void answer();
+void Ranswer();
+void reform(); 
+
+int main() {
+	system("mode con cols=100 lines=2000");//设置窗口大小   
+	system("color 79");                    //设置窗口颜色 
+
+	int key=1;
+	calculate();
+	while(key) {                           //菜单选择 
+		switch(menu()) {
+			case  '1': {
+				printf("\n\n\n");
+				answer();
+			}
+			break;
+			case  '2': {
+				printf("\n\n\n");
+				Ranswer();
+			}
+			break;
+			case  '3': {
+				printf("\n\n\n");
+				evaluate();
+			}
+			break;
+			case  '4':
+
+			{
+				printf("\n\n\n");
+				reform();
+			}
+			break;
+			case  '5': {
+				printf("\n\n\n");
+				calculate();
+			}
+			break;
+			case  '0': {
+				printf("\n您已退出四则运算系统，谢谢支持!\n\n");
+				key=0;
+			}
+		}
+
+
+	}
+}
+
+void calculate() {                    //生成四则运算并自动检查统计分数 
+    printf("欢迎来到小学四则运算系统！\n\n您将开始进行测试！\n\n");
+	count=0;
+	grade=0;
+	srand(time(NULL));                //启动随机数生成器
+	do {
+		count++;
+		num1 = rand() % 10+1;         //生成随机数num1
+		num2 = rand() % 10+1;         //生成随机数num2
+		num3 = rand() % 10+1;         //生成随机数num3
+
+		switch (num1 % 4) {
+			case 0:
+				op1 = '+';
+				break;
+			case 1:
+				op1 = '-';
+				break;
+			case 2:
+				op1 = '*';
+				break;
+			case 3:
+				op1 = '/';
+				break;
+			default:
+				break;
+		}
+
+		switch (num2 % 4) {
+			case 0:
+				op2 = '+';
+				flag = 0;
+				break;
+			case 1:
+				op2 = '-';
+				flag = 0;
+				break;
+			case 2:
+				op2 = '*';
+				if((op1=='*')||(op1=='/')) flag = 0;
+				else flag = 1;
+				break;
+			case 3:
+				op2 = '/';
+				if((op1=='*')||(op1=='/')) flag = 0;
+				else flag = 1;
+				break;
+			default:
+				break;
+		}
+
+		printf("第%d题：%d %c %d %c %d = ",count,num1,op1,num2,op2,num3);
+
+		if(flag==0) {                           //从左到右计算 
+			resultTrue = 0;
+
+			switch (op1) {
+				case '+':
+					resultTrue = num1+num2;
+					break;
+				case '-':
+					resultTrue = num1-num2;
+					break;
+				case '*':
+					resultTrue = num1*num2;
+					break;
+				case '/':
+					resultTrue = num1/num2;
+					break;
+				default:
+					break;
+			}
+			switch (op2) {
+				case '+':
+					resultTrue += num3;
+					break;
+				case '-':
+					resultTrue -= num3;
+					break;
+				case '*':
+					resultTrue *= num3;
+					break;
+				case '/':
+					resultTrue /= num3;
+					break;
+				default:
+					break;
+			}
+		} else {                                          //从右到左计算 
+			resultTrue = 0;
+			switch (op2) {
+				case '+':
+					resultTrue = num2+num3;
+					break;
+				case '-':
+					resultTrue = num2-num3;
+					break;
+				case '*':
+					resultTrue = num2*num3;
+					break;
+				case '/':
+					resultTrue = num2/num3;
+					break;
+				default:
+					break;
+			}
+			switch (op1) {
+				case '+':
+					resultTrue = num1 + resultTrue;
+					break;
+				case '-':
+					resultTrue = num1 - resultTrue;
+					break;
+				case '*':
+					resultTrue = num1 * resultTrue;
+					break;
+				case '/':
+					resultTrue = num1 / resultTrue;
+					break;
+				default:
+					break;
+			}
+		}
+get_result: {                
+			memset(ans, 0, sizeof ans);
+			scanf("%s",ans);
+		}
+		int position = 0;                  //判断第一个符号，如果是'-'或数字，则正常判断，如果不是则重新输入 
+		if (strlen(ans)) {
+			if (ans[0] == '-')
+				position = 1;
+		} else {
+			goto get_result;
+		}
+		for (int i = position; i < strlen(ans); i ++) {
+			if (!isdigit(ans[i])) {
+				printf("请输入数字！\n");
+				goto get_result;
+			}
+		}
+		result = 0;
+		for (int i = position; i < strlen(ans); i ++) {
+			result = result * 10 + ans[i] - '0';
+		}
+		if (position == 1) {
+			result = -result;
+		}
+		if (result == resultTrue)           //比较答案，相同则分数+5 
+			grade+=5;
+		nums1[count - 1] = num1;
+		nums2[count - 1] = num2;
+		nums3[count - 1] = num3;
+		ops1[count - 1] = op1;
+		ops2[count - 1] = op2;
+		results[count - 1] = result;
+		resultTrues[count - 1] = resultTrue;
+	} while(count<N);
+	printf("\n测试结束!\n\n");
+}
+
+char menu() {                        //菜单界面，用户可根据菜单进行选择 
+	char  c='0';
+	printf("\n************ 小学四则运算系统 **************\n\n\n");
+	printf("          1.显示答卷        2.错题正解\n\n");
+	printf("          3.试卷分数        4.错题重做\n\n");
+	printf("          5.再来一轮        0.退出系统\n\n");
+	printf("\n********************************************");
+	printf("\n请输入选项(0-6):");
+	do {
+		scanf("%c",&c);
+	} while(!(c>='0'&&c<='5'));
+	return c;
+}
+
+void evaluate() {                                   //试卷分数并评估 
+	printf("您的成绩是%d分.\n",grade);
+	switch(grade) {
+		case  100:
+			printf("非常棒！！但不要骄傲哦！\n");
+			break;
+		case  90:
+			printf("很好，可以继续冲刺满分！\n");
+			break;
+		case  80:
+		case  70:
+			printf("还不错，还得多多努力\n");
+			break;
+		case  60:
+			printf("及格!成绩不太理想哦\n");
+			break;
+		case  50:
+		case  40:
+		case  30:
+		case  20:
+		case  10:
+			printf("多花点功夫吧,不然你会后悔的!!\n");
+			break;
+		case  0:
+			printf("太差了!再做一次吧！！\n");
+			break;
+	}
+	printf("\n\n");
+}
+
+void answer() {                             //显示答卷 
+	int j;
+	printf("您的答卷为:\n");
+	for(j=0; j<N; j++) {
+		printf("第%d题：%d %c %d %c %d = %d\n",j+1,nums1[j],ops1[j],nums2[j],ops2[j],nums3[j],results[j]);
+	}
+	printf("\n\n");
+}
+
+void Ranswer() {                             //错题正解 
+	int k;
+	printf("您答错的题的正确答案为:\n");
+	for(k=0; k<N; k++) {
+		if(results[k]==resultTrues[k]) {
+			continue;
+		} else {
+			printf("第%d题：%d %c %d %c %d = %d\n",k+1,nums1[k],ops1[k],nums2[k],ops2[k],nums3[k],resultTrues[k]);
+
+		}
+	}
+	printf("\n\n");
+}
+
+void reform() {                               //错题重做 
+	int m,n;
+	printf("以下是您做错的题,请重做:\n");
+	for(m=0; m<N; m++) {
+		if(results[m]==resultTrues[m]) {
+			continue;
+		} else {
+			printf("第%d题：%d %c %d %c %d = \n",m+1,nums1[m],ops1[m],nums2[m],ops2[m],nums3[m]);
+
+		}
+get_result: {
+			memset(ans, 0, sizeof ans);
+			scanf("%s",ans);
+		}
+		int position = 0;
+		if (strlen(ans)) {
+			if (ans[0] == '-')
+				position = 1;
+		} else {
+			goto get_result;
+		}
+		for (int i = position; i < strlen(ans); i++) {
+			if (!isdigit(ans[i])) {
+				printf("请输入数字！\n");
+				goto get_result;
+			}
+		}
+		int chance = 0;                           //限制重做次数 
+		result = 0;
+		for (int i = position; i < strlen(ans); i++) {
+			result = result * 10 + ans[i] - '0';
+		}
+		if (position == 1) {
+			result = -result;
+		}
+		if(result==resultTrues[m]) {
+			printf("恭喜!您做对了!\n");
+			results[m] = result;
+		} else {
+			for(n=chance; n<3; n++) {
+				printf("仍未做对!您只有%d次机会了哦:   ",2-n);
+				printf("第%d题：%d %c %d %c %d = \n",m+1,nums1[m],ops1[m],nums2[m],ops2[m],nums3[m]);
+get_another_result: {
+					memset(ans, 0, sizeof ans);
+					scanf("%s",ans);
+				}
+				int position = 0;
+				if (strlen(ans)) {
+					if (ans[0] == '-')
+						position = 1;
+				} else {
+					goto get_another_result;
+				}
+				for (int i = position; i < strlen(ans); i ++) {
+					if (!isdigit(ans[i])) {
+						printf("请输入数字！\n");
+						goto get_another_result;
+					}
+				}
+				result = 0;
+				for (int i = position; i < strlen(ans); i ++) {
+					result = result * 10 + ans[i] - '0';
+				}
+				if (position == 1) {
+					result = -result;
+				}
+				if(result==resultTrues[m]) {
+					printf("恭喜!您做对了!\n");
+					results[m] = result;
+					break;
+				}
+			}
+		}
+		printf("\n\n");
+	}
+}
